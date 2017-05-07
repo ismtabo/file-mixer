@@ -2,9 +2,12 @@ from gi.repository import Gtk
 
 from .controller import MainViewController
 
+
 class MainView(object):
     """docstring for MainView."""
+
     def __init__(self, builder, window_label):
+
         super(MainView, self).__init__()
         self._builder = builder
         self._window = self._builder.get_object(window_label)
@@ -14,17 +17,134 @@ class MainView(object):
         self._bind_events()
 
     def _load_elements(self):
+
+        # Menu buttons
+        self._newmenuitem = self._builder.get_object('newimagemenuitem')
+        self._openmenuitem = self._builder.get_object('openimagemenuitem')
+        self._savemenuitem = self._builder.get_object('saveimagemenuitem')
+        self._saveasmenuitem = self._builder.get_object('saveasimagemenuitem')
+        self._exitmenuitem = self._builder.get_object('exitimagemenuitem')
+        self._aboutmenuitem = self._builder.get_object('aboutimagemenuitem')
+        
+        # Number of problem input
         self._problemnumberentry = self._builder.get_object('problemnumberentry')
+
+        # Output files information labels
         self._inputsizelabel = self._builder.get_object('inputsizelabel')
         self._answersizelabel = self._builder.get_object('answersizelabel')
-        pass
+
+        # File management buttons
+        self._newproblembutton = self._builder.get_object('newproblembutton')
+        self._saveproblembutton = self._builder.get_object('saveproblembutton')
+        self._openproblembutton = self._builder.get_object('openproblembutton')
+
+        # File treeview
+        self._foldertreestore = self._builder.get_object('foldertreestore')
+        self._foldertreeview = self._builder.get_object('foldertreeview')
+
+        # Used file treeview
+        self._choosenfilestreestore = self._builder.get_object('choosenfilestreestore')
+        self._choosenfilestreeview = self._builder.get_object('choosenfilestreeview')
+
+        # Input/answer extensions treeviews
+        self._inputextensiontreestore = self._builder.get_object('inputextensiontreestore')
+        self._inputextensiontreestore = self._builder.get_object('inputextensiontreestore')
+        self._answerextensiontreeview = self._builder.get_object('answerextensiontreeview')
+        self._answerextensiontreeview = self._builder.get_object('answerextensiontreeview')
+        
+        # Input/answer extension management
+        self._inputextensionentry = self._builder.get_object('inputextensionentry')
+        self._answerextensionentry = self._builder.get_object('answerextensionentry')
+        self._addinputextensionbutton = self._builder.get_object('addinputextensionbutton')
+        self._addanswerextensionbutton = self._builder.get_object('addanswerextensionbutton')
+
+        # Input/answer result content
+        self._inputfiletextview = self._builder.get_object('inputfiletextview')
+        self._answerfiletextview = self._builder.get_object('answerfiletextview')
+
 
     def _bind_events(self):
+
+        # Window close event
         self._window.connect("delete-event", Gtk.main_quit)
+
+        # Menu buttons events
+        self._newmenuitem.connect('select', self.noop)
+        self._openmenuitem.connect('select', self.noop)
+        self._savemenuitem.connect('select', self.noop)
+        self._saveasmenuitem.connect('select', self.noop)
+        self._exitmenuitem.connect('select', self.noop)
+        self._aboutmenuitem.connect('select', self.noop)
+
+        # Number of problem input event 
         self._problemnumberentry.connect("changed", self._problem_number_changed)
 
+        # File management buttons events
+        self._newproblembutton.connect('clicked', self.noop)
+        self._saveproblembutton.connect('clicked', self.noop)
+        self._openproblembutton.connect('clicked', self.noop)
+
+        # Input/answer extension management events
+        self._addinputextensionbutton = self._builder.get_object('addinputextensionbutton')
+        self._addanswerextensionbutton = self._builder.get_object('addanswerextensionbutton')
+
+
     def show_all(self):
+
         self._window.show_all()
 
+    
+    def _open_folder_dialog(self, element):
+        
+        dialog = Gtk.FileChooserDialog("Please choose a file", self,
+            Gtk.FileChooserAction.OPEN,
+            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+             Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+
+        self.add_filters(dialog)
+
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            print("Open clicked")
+            print("File selected: " + dialog.get_filename())
+        elif response == Gtk.ResponseType.CANCEL:
+            print("Cancel clicked")
+
+        dialog.destroy()
+
+
     def _problem_number_changed(self, entry):
+
         self.controller.problem_number_changed(entry.get_text())
+
+        
+    def update_folder_treeview(self, dirname):
+
+        def dirwalk(path, parent=None):
+            # Iterate over the contents of the specified path
+            for f in os.listdir(path):
+                # Get the absolute path of the item
+                fullname = os.path.join(path, f)
+                # Extract metadata from the item
+                fdata = os.stat(fullname)
+                # Determine if the item is a folder
+                is_folder = stat.S_ISDIR(fdata.st_mode)
+                # Generate an icon from the default icon theme
+                img = Gtk.icon_theme_get_default().load_icon(
+                    "folder" if is_folder else "document",
+                    Gtk.ICON_SIZE_MENU, 0)
+                # Append the item to the TreeStore
+                li = self._foldertreestore.append(parent, [f, img, fdata.st_size, is_folder])
+                # If the item is a folder, descend into it
+                if is_folder: dirwalk(fullname, li)
+
+        dirwalk(dirname) 
+
+    def reset_treeview(self):
+
+        self._foldertreestore.clear()
+
+
+    def noop(self, param):
+
+        print('New event not bind from ', param)
