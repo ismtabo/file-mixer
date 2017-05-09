@@ -5,6 +5,7 @@ class MainViewController(object):
 
         super(MainViewController, self).__init__()
         self.view = view
+        self._current_dir = ""
 
 
     def problem_number_changed(self, new_problem_number):
@@ -13,9 +14,16 @@ class MainViewController(object):
 
 
     @property
-    def current_dir():
+    def current_dir(self):
         return self._current_dir
 
     @current_dir.setter
-    def current_dir(new_dir):
+    def current_dir(self, new_dir):
         self._current_dir = new_dir
+
+    def open_folder(self):
+        new_path = self.view.open_folder_dialog()
+
+        if new_path:
+            self.current_dir = new_path
+            self.view.update_folder_treeview(self.current_dir)

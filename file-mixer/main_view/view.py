@@ -1,3 +1,5 @@
+import os
+import stat
 from gi.repository import Gtk
 
 from .controller import MainViewController
@@ -25,7 +27,7 @@ class MainView(object):
         self._saveasmenuitem = self._builder.get_object('saveasimagemenuitem')
         self._exitmenuitem = self._builder.get_object('exitimagemenuitem')
         self._aboutmenuitem = self._builder.get_object('aboutimagemenuitem')
-        
+
         # Number of problem input
         self._problemnumberentry = self._builder.get_object('problemnumberentry')
 
@@ -51,7 +53,7 @@ class MainView(object):
         self._inputextensiontreestore = self._builder.get_object('inputextensiontreestore')
         self._answerextensiontreeview = self._builder.get_object('answerextensiontreeview')
         self._answerextensiontreeview = self._builder.get_object('answerextensiontreeview')
-        
+
         # Input/answer extension management
         self._inputextensionentry = self._builder.get_object('inputextensionentry')
         self._answerextensionentry = self._builder.get_object('answerextensionentry')
@@ -70,19 +72,19 @@ class MainView(object):
 
         # Menu buttons events
         self._newmenuitem.connect('select', self.noop)
-        self._openmenuitem.connect('select', self.noop)
+        self._openmenuitem.connect('activate', self._open_folder_clicked)
         self._savemenuitem.connect('select', self.noop)
         self._saveasmenuitem.connect('select', self.noop)
         self._exitmenuitem.connect('select', self.noop)
         self._aboutmenuitem.connect('select', self.noop)
 
-        # Number of problem input event 
+        # Number of problem input event
         self._problemnumberentry.connect("changed", self._problem_number_changed)
 
         # File management buttons events
         self._newproblembutton.connect('clicked', self.noop)
         self._saveproblembutton.connect('clicked', self.noop)
-        self._openproblembutton.connect('clicked', self.noop)
+        self._openproblembutton.connect('clicked', self._open_folder_clicked)
 
         # Input/answer extension management events
         self._addinputextensionbutton = self._builder.get_object('addinputextensionbutton')
@@ -93,31 +95,40 @@ class MainView(object):
 
         self._window.show_all()
 
-    
-    def _open_folder_dialog(self, element):
-        
-        dialog = Gtk.FileChooserDialog("Please choose a file", self,
-            Gtk.FileChooserAction.OPEN,
+
+    def _open_folder_clicked(self, element):
+
+        self.controller.open_folder()
+
+
+    def open_folder_dialog(self):
+
+        path = ""
+        dialog = Gtk.FileChooserDialog("Please choose a file", self._window,
+            Gtk.FileChooserAction.SELECT_FOLDER,
             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
              Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
 
-        self.add_filters(dialog)
+        # self.add_filters(dialog)
 
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
             print("Open clicked")
             print("File selected: " + dialog.get_filename())
+            path = dialog.get_filename()
         elif response == Gtk.ResponseType.CANCEL:
             print("Cancel clicked")
 
         dialog.destroy()
+
+        return path
 
 
     def _problem_number_changed(self, entry):
 
         self.controller.problem_number_changed(entry.get_text())
 
-        
+
     def update_folder_treeview(self, dirname):
 
         def dirwalk(path, parent=None):
@@ -130,15 +141,15 @@ class MainView(object):
                 # Determine if the item is a folder
                 is_folder = stat.S_ISDIR(fdata.st_mode)
                 # Generate an icon from the default icon theme
-                img = Gtk.icon_theme_get_default().load_icon(
+                img = Gtk.IconTheme.get_default().load_icon(
                     "folder" if is_folder else "document",
-                    Gtk.ICON_SIZE_MENU, 0)
+                    12, 0)
                 # Append the item to the TreeStore
                 li = self._foldertreestore.append(parent, [f, img, fdata.st_size, is_folder])
                 # If the item is a folder, descend into it
                 if is_folder: dirwalk(fullname, li)
 
-        dirwalk(dirname) 
+        dirwalk(dirname)
 
     def reset_treeview(self):
 

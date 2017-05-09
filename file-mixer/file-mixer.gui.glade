@@ -157,6 +157,34 @@
                     <child internal-child="selection">
                       <object class="GtkTreeSelection" id="foldertreeview-selection"/>
                     </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="treeviewcolumn1">
+                        <property name="title" translatable="yes">File</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="text"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                        <child>
+                          <object class="GtkCellRendererPixbuf" id="pixbuf"/>
+                          <attributes>
+                            <attribute name="pixbuf">1</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="treeviewcolumn2">
+                        <property name="title" translatable="yes">Size</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="text1"/>
+                          <attributes>
+                            <attribute name="text">2</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -337,7 +365,7 @@
                                 <property name="can_focus">False</property>
                                 <property name="layout_style">start</property>
                                 <child>
-                                  <object class="GtkButton" id="newproblembutton">
+                                  <object class="GtkButton" id="openproblembutton">
                                     <property name="label">gtk-open</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
@@ -352,7 +380,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkButton" id="saveproblembutton">
+                                  <object class="GtkButton" id="newproblembutton">
                                     <property name="label">gtk-new</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
@@ -367,7 +395,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkButton" id="openproblembutton">
+                                  <object class="GtkButton" id="saveproblembutton">
                                     <property name="label">gtk-save</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
