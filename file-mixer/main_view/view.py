@@ -43,12 +43,14 @@ class MainView(object):
         # File treeview
         self._foldertreestore = self._builder.get_object('foldertreestore')
         self._foldertreeview = self._builder.get_object('foldertreeview')
+        self._foldertreeviewselection = self._builder.get_object('foldertreeview-selection')
 
         # Used file treeview
         self._choosenfilestreestore = self._builder.get_object('choosenfilestreestore')
         self._choosenfilestreeview = self._builder.get_object('choosenfilestreeview')
         self._inputfiletreeviewcolumn = self._builder.get_object('inputfiletreeviewcolumn')
         self._answerfiletreeviewcolumn = self._builder.get_object('answerfiletreeviewcolumn')
+        self._choosenfilestreeviewselection = self._builder.get_object('choosenfilestreeview-selection')
 
         # Input/answer extensions treeviews
         self._inputextensiontreestore = self._builder.get_object('inputextensiontreestore')
@@ -68,7 +70,6 @@ class MainView(object):
         self._inputfiletextview = self._builder.get_object('inputfiletextview')
         self._answerfiletextview = self._builder.get_object('answerfiletextview')
 
-
     def _bind_events(self):
 
         # Window close event
@@ -82,38 +83,44 @@ class MainView(object):
         self._exitmenuitem.connect('select', self.noop)
         self._aboutmenuitem.connect('select', self.noop)
 
+        # Folder treeview events
+        self._foldertreeviewselection.connect('changed', self._folder_selection_changed)
+
         # Number of problem input event
-        self._problemnumberentry.connect("changed", self._problem_number_changed)
+        self._problemnumberentry.connect('changed', self._problem_number_changed)
 
         # File management buttons events
         self._newproblembutton.connect('clicked', self.noop)
         self._saveproblembutton.connect('clicked', self.noop)
         self._openproblembutton.connect('clicked', self._open_folder_clicked)
 
+        # Choosen files treeview events
+        self._choosenfilestreeviewselection.connect('changed', self.noop)
+
         # Input/answer extension management events
         self._addinputextensionbutton = self._builder.get_object('addinputextensionbutton')
         self._addanswerextensionbutton = self._builder.get_object('addanswerextensionbutton')
 
+    def load_default_settings(self):
+
+        self._inputextensiontreestore.append('in')
+        self._answerextensiontreestore.append('data')
 
     def show_all(self):
 
         self._window.show_all()
 
-
     def _open_folder_clicked(self, element):
 
         self.controller.open_folder()
-
 
     def open_folder_dialog(self):
 
         path = ""
         dialog = Gtk.FileChooserDialog("Please choose a file", self._window,
-            Gtk.FileChooserAction.SELECT_FOLDER,
-            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-             Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
-
-        # self.add_filters(dialog)
+                                       Gtk.FileChooserAction.SELECT_FOLDER,
+                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                        Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
 
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
@@ -127,13 +134,13 @@ class MainView(object):
 
         return path
 
-
     def _problem_number_changed(self, entry):
 
         self.controller.problem_number_changed(entry.get_text())
 
-
     def update_folder_treeview(self, dirname):
+
+        self._reset_treeview()
 
         def dirwalk(path, parent=None):
             # Iterate over the contents of the specified path
@@ -151,14 +158,20 @@ class MainView(object):
                 # Append the item to the TreeStore
                 li = self._foldertreestore.append(parent, [f, img, fdata.st_size, is_folder])
                 # If the item is a folder, descend into it
-                if is_folder: dirwalk(fullname, li)
+                if is_folder:
+                    dirwalk(fullname, li)
 
         dirwalk(dirname)
 
-    def reset_treeview(self):
+    def _reset_treeview(self):
 
         self._foldertreestore.clear()
 
+    def _folder_selection_changed(self, element):
+        _, iter = element.get_selected()
+        file_name, is_file = self._foldertreestore.get(iter, 0, 4)
+        if is_file:
+            self.controller.add_choosen_file(file_name)
 
     def noop(self, param):
 
