@@ -47,18 +47,22 @@ class MainView(object):
         # Used file treeview
         self._choosenfilestreestore = self._builder.get_object('choosenfilestreestore')
         self._choosenfilestreeview = self._builder.get_object('choosenfilestreeview')
+        self._inputfiletreeviewcolumn = self._builder.get_object('inputfiletreeviewcolumn')
+        self._answerfiletreeviewcolumn = self._builder.get_object('answerfiletreeviewcolumn')
 
         # Input/answer extensions treeviews
         self._inputextensiontreestore = self._builder.get_object('inputextensiontreestore')
-        self._inputextensiontreestore = self._builder.get_object('inputextensiontreestore')
-        self._answerextensiontreeview = self._builder.get_object('answerextensiontreeview')
+        self._inputextensiontreeview = self._builder.get_object('inputextensiontreeview')
+        self._answerextensiontreestore = self._builder.get_object('answerextensiontreestore')
         self._answerextensiontreeview = self._builder.get_object('answerextensiontreeview')
 
         # Input/answer extension management
         self._inputextensionentry = self._builder.get_object('inputextensionentry')
-        self._answerextensionentry = self._builder.get_object('answerextensionentry')
         self._addinputextensionbutton = self._builder.get_object('addinputextensionbutton')
+        self._inputextensiontreeviewcolumn = self._builder.get_object('inputextensiontreeviewcolumn')
+        self._answerextensionentry = self._builder.get_object('answerextensionentry')
         self._addanswerextensionbutton = self._builder.get_object('addanswerextensionbutton')
+        self._answerextensiontreeviewcolumn = self._builder.get_object('_answerextensiontreeviewcolumn')
 
         # Input/answer result content
         self._inputfiletextview = self._builder.get_object('inputfiletextview')

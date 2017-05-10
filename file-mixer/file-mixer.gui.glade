@@ -159,7 +159,7 @@
                     </child>
                     <child>
                       <object class="GtkTreeViewColumn" id="treeviewcolumn1">
-                        <property name="title" translatable="yes">File</property>
+                        <property name="title" translatable="yes">Nombre</property>
                         <child>
                           <object class="GtkCellRendererText" id="text"/>
                           <attributes>
@@ -176,7 +176,7 @@
                     </child>
                     <child>
                       <object class="GtkTreeViewColumn" id="treeviewcolumn2">
-                        <property name="title" translatable="yes">Size</property>
+                        <property name="title" translatable="yes">Tamaño</property>
                         <child>
                           <object class="GtkCellRendererText" id="text1"/>
                           <attributes>
@@ -459,8 +459,32 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="model">choosenfilesliststore</property>
+                        <property name="reorderable">True</property>
+                        <property name="enable_grid_lines">horizontal</property>
                         <child internal-child="selection">
                           <object class="GtkTreeSelection" id="treeview-selection2"/>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="inputfiletreeviewcolumn">
+                            <property name="title" translatable="yes">Input</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="cellrenderertext1"/>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="answerfiletreeviewcolumn">
+                            <property name="title" translatable="yes">Answer</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="cellrenderertext2"/>
+                              <attributes>
+                                <attribute name="text">1</attribute>
+                              </attributes>
+                            </child>
+                          </object>
                         </child>
                       </object>
                       <packing>
@@ -564,6 +588,17 @@
                             <child internal-child="selection">
                               <object class="GtkTreeSelection" id="inputextensiontreeview-selection"/>
                             </child>
+                            <child>
+                              <object class="GtkTreeViewColumn" id="inputextensiontreeviewcolumn">
+                                <property name="title" translatable="yes">Extensión</property>
+                                <child>
+                                  <object class="GtkCellRendererText" id="cellrenderertext3"/>
+                                  <attributes>
+                                    <attribute name="text">0</attribute>
+                                  </attributes>
+                                </child>
+                              </object>
+                            </child>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -656,9 +691,20 @@
                           <object class="GtkTreeView" id="answerextensiontreeview">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="model">inputextensionliststore</property>
+                            <property name="model">answerextensionliststore</property>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection" id="answerextensiontreeview-selection"/>
+                            </child>
+                            <child>
+                              <object class="GtkTreeViewColumn" id="answerextensiontreeviewcolum">
+                                <property name="title" translatable="yes">Extensión</property>
+                                <child>
+                                  <object class="GtkCellRendererText" id="cellrenderertext4"/>
+                                  <attributes>
+                                    <attribute name="text">0</attribute>
+                                  </attributes>
+                                </child>
+                              </object>
                             </child>
                           </object>
                           <packing>
