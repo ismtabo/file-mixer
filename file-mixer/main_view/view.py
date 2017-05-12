@@ -13,10 +13,12 @@ class MainView(object):
         super(MainView, self).__init__()
         self._builder = builder
         self._window = self._builder.get_object(window_label)
-        self.controller = MainViewController(self)
 
         self._load_elements()
         self._bind_events()
+
+        self.controller = MainViewController(self)
+
 
     def _load_elements(self):
 
@@ -46,16 +48,16 @@ class MainView(object):
         self._foldertreeviewselection = self._builder.get_object('foldertreeview-selection')
 
         # Used file treeview
-        self._choosenfilestreestore = self._builder.get_object('choosenfilestreestore')
+        self._choosenfilestreestore = self._builder.get_object('choosenfilesliststore')
         self._choosenfilestreeview = self._builder.get_object('choosenfilestreeview')
         self._inputfiletreeviewcolumn = self._builder.get_object('inputfiletreeviewcolumn')
         self._answerfiletreeviewcolumn = self._builder.get_object('answerfiletreeviewcolumn')
         self._choosenfilestreeviewselection = self._builder.get_object('choosenfilestreeview-selection')
 
         # Input/answer extensions treeviews
-        self._inputextensiontreestore = self._builder.get_object('inputextensiontreestore')
+        self._inputextensiontreestore = self._builder.get_object('inputextensionliststore')
         self._inputextensiontreeview = self._builder.get_object('inputextensiontreeview')
-        self._answerextensiontreestore = self._builder.get_object('answerextensiontreestore')
+        self._answerextensiontreestore = self._builder.get_object('answerextensionliststore')
         self._answerextensiontreeview = self._builder.get_object('answerextensiontreeview')
 
         # Input/answer extension management
@@ -110,15 +112,28 @@ class MainView(object):
 
         self._window.show_all()
 
-    def _open_folder_clicked(self, element):
+    def open_error_dialog(self, error):
 
-        self.controller.open_folder()
+        dialog = Gtk.MessageDialog(self._window, 0, Gtk.MessageType.ERROR,
+            Gtk.ButtonsType.CANCEL, error)
+        dialog.format_secondary_text(
+            "")
+        dialog.run()
+        dialog.destroy()
 
-    def open_folder_dialog(self):
+    def open_confirmation_dialog(self, confirmation_question, confirmation_title=None):
+
+        dialog = ConfirmationDialog(self._window, confirmation_question, confirmation_title)
+        response = dialog.run()
+        dialog.destroy()
+
+        return response == Gtk.ResponseType.OK
+
+    def open_file_dialog(self):
 
         path = ""
         dialog = Gtk.FileChooserDialog("Please choose a file", self._window,
-                                       Gtk.FileChooserAction.SELECT_FOLDER,
+                                       Gtk.FileChooserAction.OPEN,
                                        (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                         Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
 
@@ -126,6 +141,31 @@ class MainView(object):
         if response == Gtk.ResponseType.OK:
             print("Open clicked")
             print("File selected: " + dialog.get_filename())
+            path = dialog.get_filename()
+        elif response == Gtk.ResponseType.CANCEL:
+            print("Cancel clicked")
+
+        dialog.destroy()
+
+        return path
+
+    def _open_folder_clicked(self, element):
+
+        self.controller.open_folder()
+
+
+    def open_folder_dialog(self):
+
+        path = ""
+        dialog = Gtk.FileChooserDialog("Please choose a folder", self._window,
+                                       Gtk.FileChooserAction.SELECT_FOLDER,
+                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                        Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            print("Open clicked")
+            print("Folder selected: " + dialog.get_filename())
             path = dialog.get_filename()
         elif response == Gtk.ResponseType.CANCEL:
             print("Cancel clicked")
@@ -169,10 +209,48 @@ class MainView(object):
 
     def _folder_selection_changed(self, element):
         _, iter = element.get_selected()
-        file_name, is_file = self._foldertreestore.get(iter, 0, 4)
-        if is_file:
+        file_name, is_folder = self._foldertreestore.get(iter, 0, 3)
+        if not is_folder:
             self.controller.add_choosen_file(file_name)
+
+    def update_extension_treeviews(self, input_extensions, answer_extensions):
+
+        self._update_input_extension_treeviews(input_extensions)
+        self._update_answer_extension_treeviews(answer_extensions)
+
+    def _update_input_extension_treeviews(self, new_input_extensions):
+
+        self._inputextensiontreestore.clear()
+        for extension in new_input_extensions:
+            self._inputextensiontreestore.append([extension])
+
+    def _update_answer_extension_treeviews(self, new_answer_extensions):
+
+        self._answerextensiontreestore.clear()
+        for extension in new_answer_extensions:
+            self._answerextensiontreestore.append([extension])
 
     def noop(self, param):
 
         print('New event not bind from ', param)
+
+
+class ConfirmationDialog(Gtk.Dialog):
+
+    def __init__(self, parent, label_text, title=None):
+
+        if not title:
+            title = "Confirmation dialog"
+
+        Gtk.Dialog.__init__(self, title, parent, 0,
+            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+             Gtk.STOCK_OK, Gtk.ResponseType.OK))
+
+        self.set_default_size(150, 100)
+
+        label = Gtk.Label(label_text)
+
+        box = self.get_content_area()
+        box.add(label)
+
+        self.show_all()
