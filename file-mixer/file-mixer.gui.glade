@@ -26,7 +26,14 @@
       <column type="gint"/>
       <!-- column-name is_folder -->
       <column type="gboolean"/>
+      <!-- column-name full_name -->
+      <column type="gchararray"/>
     </columns>
+  </object>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-open</property>
   </object>
   <object class="GtkListStore" id="inputextensionliststore">
     <columns>
@@ -65,12 +72,13 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="openimagemenuitem">
-                        <property name="label">gtk-open</property>
+                      <object class="GtkImageMenuItem" id="openfolderimagemenuitem">
+                        <property name="label">_Abrir carpeta</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
+                        <property name="image">image1</property>
+                        <property name="use_stock">False</property>
                       </object>
                     </child>
                     <child>
@@ -150,39 +158,46 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkTreeView" id="foldertreeview">
+                  <object class="GtkScrolledWindow" id="scrolledwindow1">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="model">foldertreestore</property>
-                    <property name="activate_on_single_click">True</property>
-                    <child internal-child="selection">
-                      <object class="GtkTreeSelection" id="foldertreeview-selection"/>
-                    </child>
+                    <property name="shadow_type">in</property>
                     <child>
-                      <object class="GtkTreeViewColumn" id="foldernametreeviewcolumn">
-                        <property name="title" translatable="yes">Nombre</property>
-                        <child>
-                          <object class="GtkCellRendererText" id="text"/>
-                          <attributes>
-                            <attribute name="text">0</attribute>
-                          </attributes>
+                      <object class="GtkTreeView" id="foldertreeview">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="model">foldertreestore</property>
+                        <property name="activate_on_single_click">True</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection" id="foldertreeview-selection"/>
                         </child>
                         <child>
-                          <object class="GtkCellRendererPixbuf" id="pixbuf"/>
-                          <attributes>
-                            <attribute name="pixbuf">1</attribute>
-                          </attributes>
+                          <object class="GtkTreeViewColumn" id="foldernametreeviewcolumn">
+                            <property name="title" translatable="yes">Nombre</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="text"/>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
+                            <child>
+                              <object class="GtkCellRendererPixbuf" id="pixbuf"/>
+                              <attributes>
+                                <attribute name="pixbuf">1</attribute>
+                              </attributes>
+                            </child>
+                          </object>
                         </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkTreeViewColumn" id="foldersizetreeviewcolumn">
-                        <property name="title" translatable="yes">Tamaño</property>
                         <child>
-                          <object class="GtkCellRendererText" id="text1"/>
-                          <attributes>
-                            <attribute name="text">2</attribute>
-                          </attributes>
+                          <object class="GtkTreeViewColumn" id="foldersizetreeviewcolumn">
+                            <property name="title" translatable="yes">Tamaño</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="text1"/>
+                              <attributes>
+                                <attribute name="text">2</attribute>
+                              </attributes>
+                            </child>
+                          </object>
                         </child>
                       </object>
                     </child>
@@ -239,10 +254,36 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="problemnumberentry">
+                          <object class="GtkBox" id="box6">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="input_purpose">number</property>
+                            <property name="can_focus">False</property>
+                            <child>
+                              <object class="GtkEntry" id="problemnumberentry">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="input_purpose">number</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="saveproblemnumberbutton">
+                                <property name="label">gtk-refresh</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="use_stock">True</property>
+                                <property name="image_position">right</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -456,34 +497,41 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkTreeView" id="choosenfilestreeview">
+                      <object class="GtkScrolledWindow" id="scrolledwindow4">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="model">choosenfilesliststore</property>
-                        <property name="reorderable">True</property>
-                        <property name="enable_grid_lines">horizontal</property>
-                        <child internal-child="selection">
-                          <object class="GtkTreeSelection" id="choosenfilestreeview-selection"/>
-                        </child>
+                        <property name="shadow_type">in</property>
                         <child>
-                          <object class="GtkTreeViewColumn" id="inputfiletreeviewcolumn">
-                            <property name="title" translatable="yes">Input</property>
-                            <child>
-                              <object class="GtkCellRendererText" id="cellrenderertext1"/>
-                              <attributes>
-                                <attribute name="text">0</attribute>
-                              </attributes>
+                          <object class="GtkTreeView" id="choosenfilestreeview">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="model">choosenfilesliststore</property>
+                            <property name="reorderable">True</property>
+                            <property name="enable_grid_lines">horizontal</property>
+                            <child internal-child="selection">
+                              <object class="GtkTreeSelection" id="choosenfilestreeview-selection"/>
                             </child>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkTreeViewColumn" id="answerfiletreeviewcolumn">
-                            <property name="title" translatable="yes">Answer</property>
                             <child>
-                              <object class="GtkCellRendererText" id="cellrenderertext2"/>
-                              <attributes>
-                                <attribute name="text">1</attribute>
-                              </attributes>
+                              <object class="GtkTreeViewColumn" id="inputfiletreeviewcolumn">
+                                <property name="title" translatable="yes">Input</property>
+                                <child>
+                                  <object class="GtkCellRendererText" id="cellrenderertext1"/>
+                                  <attributes>
+                                    <attribute name="text">0</attribute>
+                                  </attributes>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkTreeViewColumn" id="answerfiletreeviewcolumn">
+                                <property name="title" translatable="yes">Answer</property>
+                                <child>
+                                  <object class="GtkCellRendererText" id="cellrenderertext2"/>
+                                  <attributes>
+                                    <attribute name="text">1</attribute>
+                                  </attributes>
+                                </child>
+                              </object>
                             </child>
                           </object>
                         </child>
@@ -556,10 +604,12 @@
                                 </child>
                                 <child>
                                   <object class="GtkButton" id="addinputextensionbutton">
-                                    <property name="label" translatable="yes">button</property>
+                                    <property name="label">gtk-add</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
+                                    <property name="use_stock">True</property>
+                                    <property name="image_position">right</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -582,21 +632,29 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkTreeView" id="inputextensiontreeview">
+                          <object class="GtkScrolledWindow" id="scrolledwindow2">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="model">inputextensionliststore</property>
-                            <child internal-child="selection">
-                              <object class="GtkTreeSelection" id="inputextensiontreeview-selection"/>
-                            </child>
+                            <property name="shadow_type">in</property>
                             <child>
-                              <object class="GtkTreeViewColumn" id="inputextensiontreeviewcolumn">
-                                <property name="title" translatable="yes">Extensión</property>
+                              <object class="GtkTreeView" id="inputextensiontreeview">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="model">inputextensionliststore</property>
+                                <property name="search_column">3</property>
+                                <child internal-child="selection">
+                                  <object class="GtkTreeSelection" id="inputextensiontreeview-selection"/>
+                                </child>
                                 <child>
-                                  <object class="GtkCellRendererText" id="cellrenderertext3"/>
-                                  <attributes>
-                                    <attribute name="text">0</attribute>
-                                  </attributes>
+                                  <object class="GtkTreeViewColumn" id="inputextensiontreeviewcolumn">
+                                    <property name="title" translatable="yes">Extensión</property>
+                                    <child>
+                                      <object class="GtkCellRendererText" id="cellrenderertext3"/>
+                                      <attributes>
+                                        <attribute name="text">0</attribute>
+                                      </attributes>
+                                    </child>
+                                  </object>
                                 </child>
                               </object>
                             </child>
@@ -663,10 +721,12 @@
                                 </child>
                                 <child>
                                   <object class="GtkButton" id="addanswerextensionbutton">
-                                    <property name="label" translatable="yes">button</property>
+                                    <property name="label">gtk-add</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
+                                    <property name="use_stock">True</property>
+                                    <property name="image_position">right</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -689,21 +749,28 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkTreeView" id="answerextensiontreeview">
+                          <object class="GtkScrolledWindow" id="scrolledwindow3">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="model">answerextensionliststore</property>
-                            <child internal-child="selection">
-                              <object class="GtkTreeSelection" id="answerextensiontreeview-selection"/>
-                            </child>
+                            <property name="shadow_type">in</property>
                             <child>
-                              <object class="GtkTreeViewColumn" id="answerextensiontreeviewcolum">
-                                <property name="title" translatable="yes">Extensión</property>
+                              <object class="GtkTreeView" id="answerextensiontreeview">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="model">answerextensionliststore</property>
+                                <child internal-child="selection">
+                                  <object class="GtkTreeSelection" id="answerextensiontreeview-selection"/>
+                                </child>
                                 <child>
-                                  <object class="GtkCellRendererText" id="cellrenderertext4"/>
-                                  <attributes>
-                                    <attribute name="text">0</attribute>
-                                  </attributes>
+                                  <object class="GtkTreeViewColumn" id="answerextensiontreeviewcolum">
+                                    <property name="title" translatable="yes">Extensión</property>
+                                    <child>
+                                      <object class="GtkCellRendererText" id="cellrenderertext4"/>
+                                      <attributes>
+                                        <attribute name="text">0</attribute>
+                                      </attributes>
+                                    </child>
+                                  </object>
                                 </child>
                               </object>
                             </child>
@@ -737,9 +804,16 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkTextView" id="inputfiletextview">
+                  <object class="GtkScrolledWindow" id="scrolledwindow7">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkTextView" id="inputfiletextview">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                      </object>
+                    </child>
                   </object>
                   <packing>
                     <property name="position">1</property>
@@ -758,9 +832,16 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkTextView" id="answerfiletextview">
+                  <object class="GtkScrolledWindow" id="scrolledwindow5">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkTextView" id="answerfiletextview">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                      </object>
+                    </child>
                   </object>
                   <packing>
                     <property name="position">2</property>
