@@ -7,7 +7,7 @@ ProblemFile = namedtuple('ProblemFile', ['input', 'answer'])
 
 
 class Problem:
-    def __init__(self, problemid, used_files = None):
+    def __init__(self, problemid, used_files=None):
         self._problemid = problemid
         self._path = None
         self._used_files = used_files or []
@@ -49,6 +49,7 @@ class Problem:
                 self._answer += file.read()
 
     def clear(self):
+
         self._input = ""
         self._answer = ""
         self._used_files.clear()
@@ -59,4 +60,4 @@ class Problem:
         return self._input, self._answer
 
     def __str__(self):
-        return """Problem Id: {}""".format(self.name)
+        return """Problem Id: {}""".format(self.number)

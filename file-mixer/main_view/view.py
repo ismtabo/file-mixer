@@ -2,8 +2,10 @@ import os
 import traceback
 
 from gi.repository import Gtk
+from gi.repository import Gdk
 
 from .controller import MainViewController
+from .errors import ChoosenFileHasNotInputExtension
 
 
 class MainView(object):
@@ -47,6 +49,8 @@ class MainView(object):
         self._foldertreestore = self._builder.get_object('foldertreestore')
         self._foldertreeview = self._builder.get_object('foldertreeview')
         self._foldertreeviewselection = self._builder.get_object('foldertreeview-selection')
+        self._foldertreeviewnamecolumn = self._builder.get_object('foldernametreeviewcolumn')
+        self._foldertreeviewsizecolumn = self._builder.get_object('foldersizetreeviewcolumn')
 
         # Used file treeview
         self._choosenfilestreestore = self._builder.get_object('choosenfilesliststore')
@@ -89,7 +93,25 @@ class MainView(object):
         self._aboutmenuitem.connect('select', self._noop)
 
         # Folder treeview events
-        self._foldertreeviewselection.connect('changed', self._folder_selection_changed)
+        # self._foldertreeviewselection.connect('changed', self._folder_selection_changed)
+
+        # Drag and drop events
+        self._foldertreeview.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [
+            ('MY_TREE_MODEL_ROW', Gtk.TargetFlags.SAME_WIDGET, 0),
+            ('text/plain', 0, 1), ], Gdk.DragAction.COPY)
+        self._choosenfilestreeview.enable_model_drag_dest([
+            ('MY_TREE_MODEL_ROW', Gtk.TargetFlags.SAME_WIDGET, 0),
+            ('text/plain', 0, 1), ], Gdk.DragAction.COPY)
+        self._foldertreeview.connect('drag-begin', self._noop)
+        self._foldertreeview.connect('drag-data-get', self._folder_treeview_drag_get_data)
+        self._choosenfilestreeview.connect('drag-data-received', self._choosenfiles_treeview_drag_data_received)
+
+        # self._choosenfilestreeview.drag_dest_set_target_list(None)
+        # self._foldertreeview.drag_source_set_target_list(None)
+        #
+        # self._foldertreeview.drag_dest_add_text_targets()
+        # self._foldertreeview.drag_source_add_text_targets()
+
 
         # Number of problem input event
         self._problemnumberentry.connect('changed', self._problem_number_changed)
@@ -263,8 +285,8 @@ class MainView(object):
 
     def _folder_selection_changed(self, element):
 
-        _, iter = element.get_selected()
-        is_folder, fullname = self._foldertreestore.get(iter, 3, 4)
+        _, iterator = element.get_selected()
+        is_folder, fullname = self._foldertreestore.get(iterator, 3, 4)
         if not is_folder:
             try:
                 self.controller.add_choosen_file(fullname)
@@ -292,16 +314,24 @@ class MainView(object):
 
         self._inputfiletextbuffer.set_text(input_content)
         self._answerfiletextbuffer.set_text(answer_content)
-        
+
+        self._update_problem_files_sizes(input_content, answer_content)
+
+    def _update_problem_files_sizes(self, input_content, answer_content):
+
+        input_file_size, answer_file_size = map(len, [input_content, answer_content])
+        self._inputsizelabel.set_text("{} B".format(input_file_size * 8))
+        self._answersizelabel.set_text("{} B".format(answer_file_size * 8))
+
     def _add_input_extension_clicked(self, element):
-        
+
         try:
             self.controller.add_input_extension(self._inputextensionentry.get_text())
         except Exception as err:
             self.open_error_dialog(err)
-        
+
     def _add_answer_extension_clicked(self, element):
-        
+
         try:
             self.controller.add_answer_extension(self._answerextensionentry.get_text())
         except Exception as err:
@@ -320,6 +350,21 @@ class MainView(object):
         try:
             self.controller.save_problem()
         except Exception as err:
+            self.open_error_dialog(err)
+
+    def _folder_treeview_drag_get_data(self, widget, drag_context, data, info, time):
+        _, iterator = self._foldertreeviewselection.get_selected()
+        is_folder, fullname = self._foldertreestore.get(iterator, 3, 4)
+
+        if not is_folder:
+            data.set_text(fullname, -1)
+
+    def _choosenfiles_treeview_drag_data_received(self, widget, drag_context, x, y, data, info, time):
+
+        try:
+            file_path = data.get_text()
+            self.controller.add_choosen_file(file_path)
+        except ChoosenFileHasNotInputExtension as err:
             self.open_error_dialog(err)
 
     def _noop(self, *param, **kwargs):
