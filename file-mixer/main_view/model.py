@@ -97,9 +97,16 @@ class MainViewModel:
     def add_choosen_file(self, input_file_name, answer_file_name):
         print('Choosen file: ', input_file_name)
         if not self._problem:
-            raise NoneCurrentProblem('There is not current problem.\nPlease entry problem number.')
+            raise NoneCurrentProblem("There is not current problem.\nPlease entry problem number.")
 
         self._problem.add_used_files(input_file_name, answer_file_name)
+
+    def remove_choosen_file(self, file_name):
+        print('Remove choosen file: ', file_name)
+        if not self._problem:
+            raise NoneCurrentProblem("There is not current problem.\nPlease entry problem number.")
+
+        self._problem.remove_used_files(file_name)
 
     @property
     def current_problem_files_content(self):
@@ -120,4 +127,3 @@ class MainViewModel:
     def current_problem_path(self, new_problem_save_path):
 
         self._problem.path = new_problem_save_path
-

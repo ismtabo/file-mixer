@@ -73,6 +73,14 @@ class MainViewController(object):
         self.view.update_choosen_files_tree_view(self.model.current_problem_choosenfiles)
         self.view.update_problem_content(*self.model.current_problem_files_content)
 
+    def remove_choosen_file(self, file_path):
+
+        file_name, _ = os.path.splitext(file_path)
+        self.model.remove_choosen_file(file_path)
+
+        self.view.update_choosen_files_tree_view(self.model.current_problem_choosenfiles)
+        self.view.update_problem_content(*self.model.current_problem_files_content)
+
     def add_input_extension(self, new_input_extension):
 
         if not new_input_extension in self.model.input_extensions:
@@ -97,22 +105,19 @@ class MainViewController(object):
         except NoneCurrentProblemSavePath as err:
             self._ask_current_problem_path()
             problem_path = self.model.current_problem_path
-            
+
         problem_input_filename = "{0}.in".format(self.model.current_problem.number)
         problem_answer_filename = "{0}.ans".format(self.model.current_problem.number)
         problem_input_content, problem_answer_content = self.model.current_problem_files_content
-        
+
         self._save_file(self.model.current_path, problem_input_filename, problem_input_content)
         self._save_file(self.model.current_path, problem_answer_filename, problem_answer_content)
 
     def _ask_current_problem_path(self):
         problem_path = self.view.open_save_file_dialog(self.model.current_path, self.model.current_problem.number)
         self.model.current_problem_path = problem_path
-    
+
     def _save_file(self, path, filename, content):
-        
+
         with open(os.path.join(path, filename), 'w') as file:
             file.write(content)
-
-        
-

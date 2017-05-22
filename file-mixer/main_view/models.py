@@ -37,6 +37,9 @@ class Problem:
     def add_used_files(self, input_file_name, answer_file_name):
         self._used_files += [ProblemFile(input_file_name, answer_file_name)]
 
+    def remove_used_files(self, file_name):
+        self._used_files = [ProblemFile(input_file_name, answer_file_name) for input_file_name, answer_file_name in self._used_files if not file_name in input_file_name]
+
     def generate(self):
         self._input = ""
         self._answer = ""

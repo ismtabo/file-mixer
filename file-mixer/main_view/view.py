@@ -1,6 +1,8 @@
 import os
 import traceback
 
+from functools import partial
+
 from gi.repository import Gtk
 from gi.repository import Gdk
 
@@ -16,6 +18,7 @@ class MainView(object):
         super(MainView, self).__init__()
         self._builder = builder
         self._window = self._builder.get_object(window_label)
+        self._right_click_menu = None
 
         self._load_elements()
         self._bind_events()
@@ -125,6 +128,7 @@ class MainView(object):
 
         # Choosen files treeview events
         self._choosenfilestreeviewselection.connect('changed', self._noop)
+        self._choosenfilestreeview.connect('button-release-event', self._choosenfiles_treeview_clicked)
 
         # Input/answer extension management events
         self._addinputextensionbutton.connect('clicked', self._add_input_extension_clicked)
@@ -345,6 +349,9 @@ class MainView(object):
             inputfilename, answerfilename = map(os.path.basename, files)
             self._choosenfilestreestore.append([inputfilename, answerfilename])
 
+    def _delete_choosen_file_clicked(self, inputfilename, element):
+        print("element clicked - delete {} file".format(inputfilename))
+
     def _save_problem_clicked(self, element):
 
         try:
@@ -364,7 +371,33 @@ class MainView(object):
         try:
             file_path = data.get_text()
             self.controller.add_choosen_file(file_path)
-        except ChoosenFileHasNotInputExtension as err:
+        except Exception as err:
+            self.open_error_dialog(err)
+
+    def _choosenfiles_treeview_clicked(self, treeview, event):
+
+        if event.button == 3:
+            selected_path = self._choosenfilestreeview.get_path_at_pos(int(event.x), int(event.y))
+
+            if selected_path:
+                path, _, _, _ = selected_path
+
+                if self._choosenfilestreeviewselection.path_is_selected(path):
+                    _, iterator = self._choosenfilestreeviewselection.get_selected()
+                    inputfilename = self._choosenfilestreestore.get(iterator, 0)[0]
+                    self._right_click_menu = Gtk.Menu()
+                    delete_button = Gtk.MenuItem("Eliminar")
+                    delete_button.connect('activate', partial(self._right_menu_delete_btn_clicked, inputfilename))
+                    self._right_click_menu.append(delete_button)
+                    self._right_click_menu.show_all()
+                    self._right_click_menu.popup(None, None, None, None, 0, Gtk.get_current_event_time())
+
+    def _right_menu_delete_btn_clicked(self, inputfilename, *args):
+
+        try:
+            self._right_click_menu.destroy()
+            self.controller.remove_choosen_file(inputfilename)
+        except Exception as err:
             self.open_error_dialog(err)
 
     def _noop(self, *param, **kwargs):
