@@ -1,4 +1,5 @@
 import os
+import json
 
 from .models import Problem
 from .model import MainViewModel
@@ -21,18 +22,44 @@ class MainViewController(object):
 
     def problem_number_changed(self, new_problem_number):
 
-        new_problem = Problem(new_problem_number)
-        self.model.current_problem = new_problem
-        self.view.update_problem_number(self.model.current_problem.number)
+        try:
+            self.model.set_problem_number(int(new_problem_number))
+            self.view.update_problem_number(self.model.current_problem.number)
+        except NoneCurrentProblem as err:
+            self.model.set_new_problem(Problem(int(new_problem_number)))
 
     def problem_number_focus_out(self, new_problem_number):
 
         if not new_problem_number:
             try:
                 problem_number = self.model.current_problem.number
-            except Exception as err:
-                problem_number = '0'
+            except NoneCurrentProblem as err:
+                problem_number = 0
             self.view.update_problem_number(problem_number)
+
+    def new_problem_file(self):
+
+        problem_number = int(self.view.open_entry_dialog())
+
+        if problem_number:
+            self.model.set_new_problem(Problem(problem_number))
+            self.view.update_problem_number(problem_number)
+            self.view.update_choosen_files_tree_view(self.model.current_problem_choosenfiles)
+            self.view.update_problem_content(*self.model.current_problem_files_content)
+
+    def open_problem_file(self):
+
+        problem_file_path = self.view.open_file_dialog()
+
+        if problem_file_path:
+            content = self._open_file(problem_file_path)
+            marshall_problem = json.loads(content)
+
+            self.model.set_new_problem(Problem.unserialize(marshall_problem))
+            self.view.update_problem_number(str(self.model.current_problem.number))
+            self.view.update_choosen_files_tree_view(self.model.current_problem_choosenfiles)
+            self.view.update_problem_content(*self.model.current_problem_files_content)
+
 
     def open_folder(self):
 
@@ -98,24 +125,38 @@ class MainViewController(object):
     def save_problem(self, force_ask_path=False):
 
         if force_ask_path:
-            self._ask_current_problem_path()
+            problem_path = self._ask_current_problem_path()
+            self.model.current_problem_path = problem_path
 
         try:
             problem_path = self.model.current_problem_path
         except NoneCurrentProblemSavePath as err:
-            self._ask_current_problem_path()
-            problem_path = self.model.current_problem_path
+            problem_path = self._ask_current_problem_path()
+            self.model.current_problem_path = problem_path
 
-        problem_input_filename = "{0}.in".format(self.model.current_problem.number)
-        problem_answer_filename = "{0}.ans".format(self.model.current_problem.number)
+        problem_serial_filename = "p{0}.prob".format(self.model.current_problem.number)
+        problem_serial_content = json.dumps(self.model.current_problem.serialize())
+
+        problem_input_filename = "p{0}.in".format(self.model.current_problem.number)
+        problem_answer_filename = "p{0}.ans".format(self.model.current_problem.number)
         problem_input_content, problem_answer_content = self.model.current_problem_files_content
 
+        self._save_file(self.model.current_path, problem_serial_filename, problem_serial_content)
         self._save_file(self.model.current_path, problem_input_filename, problem_input_content)
         self._save_file(self.model.current_path, problem_answer_filename, problem_answer_content)
+        self.model.set_problem_saved()
 
     def _ask_current_problem_path(self):
-        problem_path = self.view.open_save_file_dialog(self.model.current_path, self.model.current_problem.number)
-        self.model.current_problem_path = problem_path
+
+        problem_path = self.view.open_folder_dialog(self.model.current_path)
+        return problem_path
+
+    def _open_file(self, path):
+
+        with open(path, 'r') as file:
+            content = file.read()
+
+        return content
 
     def _save_file(self, path, filename, content):
 

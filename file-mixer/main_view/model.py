@@ -68,13 +68,21 @@ class MainViewModel:
 
         return self._problem
 
-    @current_problem.setter
-    def current_problem(self, new_problem):
+    def set_new_problem(self, problem):
 
-        if self._is_modified and self._problem:
+        if self._is_modified:
             raise UnsavedModifiedProblem('Current problem should be saved before open new one.')
 
-        self._problem = new_problem
+        self._problem = problem
+        self._is_modified = False
+
+    def set_problem_number(self, new_problem_number):
+
+        if not self._problem:
+            raise NoneCurrentProblem('There is not current problem.')
+
+        self._problem.number = new_problem_number
+        self._is_modified = True
 
     @property
     def input_extensions(self):
@@ -100,6 +108,7 @@ class MainViewModel:
             raise NoneCurrentProblem("There is not current problem.\nPlease entry problem number.")
 
         self._problem.add_used_files(input_file_name, answer_file_name)
+        self._is_modified = True
 
     def remove_choosen_file(self, file_name):
         print('Remove choosen file: ', file_name)
@@ -107,6 +116,7 @@ class MainViewModel:
             raise NoneCurrentProblem("There is not current problem.\nPlease entry problem number.")
 
         self._problem.remove_used_files(file_name)
+        self._is_modified = True
 
     @property
     def current_problem_files_content(self):
@@ -125,5 +135,8 @@ class MainViewModel:
 
     @current_problem_path.setter
     def current_problem_path(self, new_problem_save_path):
-
         self._problem.path = new_problem_save_path
+        self._is_modified = True
+
+    def set_problem_saved(self):
+        self._is_modified = False

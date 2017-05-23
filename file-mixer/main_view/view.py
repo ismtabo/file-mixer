@@ -21,11 +21,45 @@ class MainView(object):
         self._right_click_menu = None
 
         self._load_elements()
-        self._bind_events()
 
         self.controller = MainViewController(self)
 
     def _load_elements(self):
+
+        # Menu buttons
+        self._load_menu_buttons()
+
+        # Number of problem input
+        self._load_problem_entry()
+
+        # Output files information labels
+        self._load_size_labels()
+
+        # File management buttons
+        self._load_problem_buttons()
+
+        # File treeview
+        self._load_folder_treeview()
+
+        # Used file treeview
+        self._load_choosenfiles_treeview()
+
+        # Foldertv to Choosentv DragnDrop events
+        self._load_foldertv2choosentv_dragndrop()
+
+        # Input/answer extension management
+        self._load_inputanswer_extensions_management()
+
+        # Input/answer result content
+        self._load_inputanswer_content_textviews()
+
+        # Window close event
+        self._window.connect('delete-event', Gtk.main_quit)
+
+        # Default settings
+        self._load_default_settings()
+
+    def _load_menu_buttons(self):
 
         # Menu buttons
         self._newmenuitem = self._builder.get_object('newimagemenuitem')
@@ -35,18 +69,46 @@ class MainView(object):
         self._exitmenuitem = self._builder.get_object('exitimagemenuitem')
         self._aboutmenuitem = self._builder.get_object('aboutimagemenuitem')
 
+        # Menu buttons events
+        self._newmenuitem.connect('select', self._noop)
+        self._openfoldermenuitem.connect('activate', self._open_folder_clicked)
+        self._savemenuitem.connect('select', self._save_problem_clicked)
+        self._saveasmenuitem.connect('select', self._noop)
+        self._exitmenuitem.connect('select', self._noop)
+        self._aboutmenuitem.connect('select', self._noop)
+
+    def _load_problem_entry(self):
+
         # Number of problem input
         self._problemnumberentry = self._builder.get_object('problemnumberentry')
         self._updateproblemnumberbutton = self._builder.get_object('saveproblemnumberbutton')
+
+        # Number of problem input event
+        self._problemnumberentry.connect('changed', self._problem_number_changed)
+        self._problemnumberentry.connect('focus-out-event', self._problem_number_focus_out)
+        self._updateproblemnumberbutton.connect('clicked', self._update_problem_number)
+
+    def _load_size_labels(self):
 
         # Output files information labels
         self._inputsizelabel = self._builder.get_object('inputsizelabel')
         self._answersizelabel = self._builder.get_object('answersizelabel')
 
+    def _load_problem_buttons(self):
+
         # File management buttons
         self._newproblembutton = self._builder.get_object('newproblembutton')
         self._saveproblembutton = self._builder.get_object('saveproblembutton')
         self._openproblembutton = self._builder.get_object('openproblembutton')
+        self._openfolderbutton = self._builder.get_object('openfolderbutton')
+
+        # File management buttons events
+        self._newproblembutton.connect('clicked', self._new_file_clicked)
+        self._saveproblembutton.connect('clicked', self._save_problem_clicked)
+        self._openproblembutton.connect('clicked', self._open_file_clicked)
+        self._openfolderbutton.connect('clicked', self._open_folder_clicked)
+
+    def _load_folder_treeview(self):
 
         # File treeview
         self._foldertreestore = self._builder.get_object('foldertreestore')
@@ -55,12 +117,33 @@ class MainView(object):
         self._foldertreeviewnamecolumn = self._builder.get_object('foldernametreeviewcolumn')
         self._foldertreeviewsizecolumn = self._builder.get_object('foldersizetreeviewcolumn')
 
+    def _load_choosenfiles_treeview(self):
+
         # Used file treeview
         self._choosenfilestreestore = self._builder.get_object('choosenfilesliststore')
         self._choosenfilestreeview = self._builder.get_object('choosenfilestreeview')
         self._inputfiletreeviewcolumn = self._builder.get_object('inputfiletreeviewcolumn')
         self._answerfiletreeviewcolumn = self._builder.get_object('answerfiletreeviewcolumn')
         self._choosenfilestreeviewselection = self._builder.get_object('choosenfilestreeview-selection')
+
+        # Choosen files treeview events
+        self._choosenfilestreeviewselection.connect('changed', self._noop)
+        self._choosenfilestreeview.connect('button-release-event', self._choosenfiles_treeview_clicked)
+
+    def _load_foldertv2choosentv_dragndrop(self):
+
+        # Drag and drop events
+        self._foldertreeview.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [
+            ('MY_TREE_MODEL_ROW', Gtk.TargetFlags.SAME_WIDGET, 0),
+            ('text/plain', 0, 1), ], Gdk.DragAction.COPY)
+        self._choosenfilestreeview.enable_model_drag_dest([
+            ('MY_TREE_MODEL_ROW', Gtk.TargetFlags.SAME_WIDGET, 0),
+            ('text/plain', 0, 1), ], Gdk.DragAction.COPY)
+        self._foldertreeview.connect('drag-begin', self._noop)
+        self._foldertreeview.connect('drag-data-get', self._folder_treeview_drag_get_data)
+        self._choosenfilestreeview.connect('drag-data-received', self._choosenfiles_treeview_drag_data_received)
+
+    def _load_inputanswer_extensions_management(self):
 
         # Input/answer extensions treeviews
         self._inputextensiontreestore = self._builder.get_object('inputextensionliststore')
@@ -76,69 +159,27 @@ class MainView(object):
         self._addanswerextensionbutton = self._builder.get_object('addanswerextensionbutton')
         self._answerextensiontreeviewcolumn = self._builder.get_object('_answerextensiontreeviewcolumn')
 
+        # Input/answer extension management events
+        self._addinputextensionbutton.connect('clicked', self._add_input_extension_clicked)
+        self._addanswerextensionbutton.connect('clicked', self._add_answer_extension_clicked)
+
+    def _load_inputanswer_content_textviews(self):
+
         # Input/answer result content
         self._inputfiletextview = self._builder.get_object('inputfiletextview')
         self._inputfiletextbuffer = self._inputfiletextview.get_buffer()
         self._answerfiletextview = self._builder.get_object('answerfiletextview')
         self._answerfiletextbuffer = self._answerfiletextview.get_buffer()
 
-    def _bind_events(self):
+    def _load_default_settings(self):
 
-        # Window close event
-        self._window.connect('delete-event', Gtk.main_quit)
+        # Default input/answer extension
+        self._inputextensiontreestore.append(['in'])
+        self._answerextensiontreestore.append(['data'])
 
-        # Menu buttons events
-        self._newmenuitem.connect('select', self._noop)
-        self._openfoldermenuitem.connect('activate', self._open_folder_clicked)
-        self._savemenuitem.connect('select', self._save_problem_clicked)
-        self._saveasmenuitem.connect('select', self._noop)
-        self._exitmenuitem.connect('select', self._noop)
-        self._aboutmenuitem.connect('select', self._noop)
-
-        # Folder treeview events
-        # self._foldertreeviewselection.connect('changed', self._folder_selection_changed)
-
-        # Drag and drop events
-        self._foldertreeview.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [
-            ('MY_TREE_MODEL_ROW', Gtk.TargetFlags.SAME_WIDGET, 0),
-            ('text/plain', 0, 1), ], Gdk.DragAction.COPY)
-        self._choosenfilestreeview.enable_model_drag_dest([
-            ('MY_TREE_MODEL_ROW', Gtk.TargetFlags.SAME_WIDGET, 0),
-            ('text/plain', 0, 1), ], Gdk.DragAction.COPY)
-        self._foldertreeview.connect('drag-begin', self._noop)
-        self._foldertreeview.connect('drag-data-get', self._folder_treeview_drag_get_data)
-        self._choosenfilestreeview.connect('drag-data-received', self._choosenfiles_treeview_drag_data_received)
-
-        # self._choosenfilestreeview.drag_dest_set_target_list(None)
-        # self._foldertreeview.drag_source_set_target_list(None)
-        #
-        # self._foldertreeview.drag_dest_add_text_targets()
-        # self._foldertreeview.drag_source_add_text_targets()
-
-
-        # Number of problem input event
-        self._problemnumberentry.connect('changed', self._problem_number_changed)
-        self._problemnumberentry.connect('focus-out-event', self._problem_number_focus_out)
-        self._updateproblemnumberbutton.connect('clicked', self._update_problem_number)
-
-        # File management buttons events
-        self._newproblembutton.connect('clicked', self._noop)
-        self._saveproblembutton.connect('clicked', self._save_problem_clicked)
-        self._openproblembutton.connect('clicked', self._open_folder_clicked)
-
-        # Choosen files treeview events
-        self._choosenfilestreeviewselection.connect('changed', self._noop)
-        self._choosenfilestreeview.connect('button-release-event', self._choosenfiles_treeview_clicked)
-
-        # Input/answer extension management events
-        self._addinputextensionbutton.connect('clicked', self._add_input_extension_clicked)
-        self._addanswerextensionbutton.connect('clicked', self._add_answer_extension_clicked)
-
-    def load_default_settings(self):
-
-        self._inputextensiontreestore.append('in')
-        self._answerextensiontreestore.append('data')
-        self._updateproblemnumberbutton.disable(False)
+        # Disable problem information update buttons
+        self._updateproblemnumberbutton.set_sensitive(False)
+        self._saveproblembutton.set_sensitive(False)
 
     def show_all(self):
 
@@ -161,6 +202,22 @@ class MainView(object):
         dialog.destroy()
 
         return response == Gtk.ResponseType.OK
+
+    def _open_file_clicked(self, element):
+
+        try:
+            self.controller.open_problem_file()
+            self._saveproblembutton.set_sensitive(False)
+        except Exception as err:
+            self.open_error_dialog(err)
+
+    def _new_file_clicked(self, element):
+
+        try:
+            self.controller.new_problem_file()
+            self._saveproblembutton.set_sensitive(False)
+        except Exception as err:
+            self.open_error_dialog(err)
 
     def open_file_dialog(self):
 
@@ -233,6 +290,23 @@ class MainView(object):
 
         return path
 
+    def open_entry_dialog(self, _label=None, _title=None):
+        label = _label or "Please input problem number"
+        title = _title
+
+        entry = ""
+        dialog = EntryDialog(self._window, label, title)
+
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            entry = dialog.get_text()
+        elif response == Gtk.ResponseType.CANCEL:
+            pass
+
+        dialog.destroy()
+
+        return entry
+
     def _problem_number_changed(self, entry):
 
         self._updateproblemnumberbutton.set_sensitive(True)
@@ -254,9 +328,9 @@ class MainView(object):
         except Exception as err:
             self.open_error_dialog(err)
 
-    def update_problem_number(self, new_problem_number):
+    def update_problem_number(self, new_problem_number: str):
 
-        self._problemnumberentry.set_text(new_problem_number)
+        self._problemnumberentry.set_text(str(new_problem_number))
 
     def update_folder_treeview(self, pathtree):
 
@@ -356,6 +430,7 @@ class MainView(object):
 
         try:
             self.controller.save_problem()
+            self._disable_save_button()
         except Exception as err:
             self.open_error_dialog(err)
 
@@ -371,6 +446,7 @@ class MainView(object):
         try:
             file_path = data.get_text()
             self.controller.add_choosen_file(file_path)
+            self._enable_save_button()
         except Exception as err:
             self.open_error_dialog(err)
 
@@ -397,12 +473,21 @@ class MainView(object):
         try:
             self._right_click_menu.destroy()
             self.controller.remove_choosen_file(inputfilename)
+            self._enable_save_button()
         except Exception as err:
             self.open_error_dialog(err)
 
     def _noop(self, *param, **kwargs):
 
         print('Event with params:\n{0}\n{1}'.format(param, kwargs))
+
+    def _enable_save_button(self):
+
+        self._saveproblembutton.set_sensitive(True)
+
+    def _disable_save_button(self):
+
+        self._saveproblembutton.set_sensitive(False)
 
 
 class ConfirmationDialog(Gtk.Dialog):
@@ -422,3 +507,26 @@ class ConfirmationDialog(Gtk.Dialog):
         box.add(label)
 
         self.show_all()
+
+class EntryDialog(Gtk.Dialog):
+    def __init__(self, parent, label_text, title=None):
+        if not title:
+            title = "Entry dialog"
+
+        Gtk.Dialog.__init__(self, title, parent, 0,
+                            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                             Gtk.STOCK_OK, Gtk.ResponseType.OK))
+
+        self.set_default_size(150, 100)
+
+        label = Gtk.Label(label_text)
+        self._entry = Gtk.Entry()
+
+        box = self.get_content_area()
+        box.add(label)
+        box.add(self._entry)
+
+        self.show_all()
+
+    def get_text(self):
+        return self._entry.get_text()
