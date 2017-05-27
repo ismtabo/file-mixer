@@ -1,7 +1,9 @@
 import os
+import sys
 import traceback
 
 from functools import partial
+from math import log, floor
 
 from gi.repository import Gtk
 from gi.repository import Gdk
@@ -115,6 +117,7 @@ class MainView(object):
         self._foldertreeview = self._builder.get_object('foldertreeview')
         self._foldertreeviewselection = self._builder.get_object('foldertreeview-selection')
         self._foldertreeviewnamecolumn = self._builder.get_object('foldernametreeviewcolumn')
+        self._foldertreeviewnamecolumn.set_sort_column_id(0)
         self._foldertreeviewsizecolumn = self._builder.get_object('foldersizetreeviewcolumn')
 
     def _load_choosenfiles_treeview(self):
@@ -397,9 +400,16 @@ class MainView(object):
 
     def _update_problem_files_sizes(self, input_content, answer_content):
 
-        input_file_size, answer_file_size = map(len, [input_content, answer_content])
-        self._inputsizelabel.set_text("{} B".format(input_file_size * 8))
-        self._answersizelabel.set_text("{} B".format(answer_file_size * 8))
+        input_file_size, answer_file_size = map(sys.getsizeof, [input_content, answer_content])
+        self._inputsizelabel.set_text("{} {}B".format(*self._raw_size_to_unit(input_file_size)))
+        self._answersizelabel.set_text("{} {}B".format(*self._raw_size_to_unit(answer_file_size)))
+
+    @staticmethod
+    def _raw_size_to_unit(size):
+
+        sizes = ['', 'K', 'M', 'G']
+        measurement = floor(log(size, 1024))
+        return size//(1024**measurement), sizes[measurement]
 
     def _add_input_extension_clicked(self, element):
 
