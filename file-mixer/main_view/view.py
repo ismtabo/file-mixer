@@ -327,7 +327,7 @@ class MainView(object):
 
         try:
             self.controller.problem_number_changed(self._problemnumberentry.get_text())
-            button.set_sensitive(False)
+            self._enable_save_button()
         except Exception as err:
             self.open_error_dialog(err)
 
