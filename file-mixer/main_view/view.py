@@ -271,13 +271,14 @@ class MainView(object):
         except Exception as err:
             self.open_error_dialog(err)
 
-    def open_folder_dialog(self, root_path=None):
+    def open_folder_dialog(self, root_path=None, save=False):
 
         path = ""
         dialog = Gtk.FileChooserDialog("Please choose a folder", self._window,
                                        Gtk.FileChooserAction.SELECT_FOLDER,
                                        (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-                                        Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+                                        Gtk.STOCK_OPEN if not save else Gtk.STOCK_SAVE,
+                                        Gtk.ResponseType.OK))
         if root_path:
             dialog.set_current_folder(os.path.abspath(root_path))
 
