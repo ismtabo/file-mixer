@@ -22,11 +22,11 @@
       <column type="gchararray"/>
       <!-- column-name img -->
       <column type="GdkPixbuf"/>
-      <!-- column-name gint1 -->
-      <column type="gint"/>
-      <!-- column-name is_folder -->
+      <!-- column-name size -->
+      <column type="gchararray"/>
+      <!-- column-name is_file -->
       <column type="gboolean"/>
-      <!-- column-name full_name -->
+      <!-- column-name fullname -->
       <column type="gchararray"/>
     </columns>
   </object>

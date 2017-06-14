@@ -348,7 +348,7 @@ class MainView(object):
                 "folder" if is_folder else "document",
                 12, 0)
             # Append the item to the TreeStore
-            li = self._foldertreestore.append(parent, [f, img, size, is_folder, fullname])
+            li = self._foldertreestore.append(parent, [f, img, "{} {}B".format(*self._raw_size_to_unit(size)), is_folder, fullname])
             # If the item is a folder, descend into it
             if is_folder:
                 for child in element.children:

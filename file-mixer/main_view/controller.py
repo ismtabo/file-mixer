@@ -148,7 +148,7 @@ class MainViewController(object):
 
     def _ask_current_problem_path(self):
 
-        problem_path = self.view.open_folder_dialog(self.model.current_path)
+        problem_path = self.view.open_folder_dialog(self.model.current_path, save=True)
         return problem_path
 
     def _open_file(self, path):
