@@ -110,13 +110,29 @@ class MainViewModel:
         self._problem.add_used_files(input_file_name, answer_file_name)
         self._is_modified = True
 
-    def remove_choosen_file(self, file_name):
+    def remove_choosen_file(self, file_name=None, file_index=None):
+        if file_name is None and file_index is None:
+            raise Exception('Either file name or file index has to be given')
+
         print('Remove choosen file: ', file_name)
         if not self._problem:
             raise NoneCurrentProblem("There is not current problem.\nPlease entry problem number.")
 
-        self._problem.remove_used_files(file_name)
+        self._problem.remove_used_files(file_index)
         self._is_modified = True
+        self._problem.generate()
+
+    def sort_choosen_files(self):
+        if not self._problem:
+            raise NoneCurrentProblem("There is not current problem.\nPlease entry problem number.")
+        self._problem.sort()
+        self._problem.generate()
+
+    def shuffle_choosen_files(self):
+        if not self._problem:
+            raise NoneCurrentProblem("There is not current problem.\nPlease entry problem number.")
+        self._problem.shuffle()
+        self._problem.generate()
 
     @property
     def current_problem_files_content(self):

@@ -43,7 +43,10 @@ class MainView(object):
         # File treeview
         self._load_folder_treeview()
 
-        # Used file treeview
+        # Used files actions
+        self._load_choosenfiles_actions()
+
+        # Used files treeview
         self._load_choosenfiles_treeview()
 
         # Foldertv to Choosentv DragnDrop events
@@ -93,6 +96,7 @@ class MainView(object):
     def _load_size_labels(self):
 
         # Output files information labels
+        self._nfileslabel = self._builder.get_object('nfileslabel')
         self._inputsizelabel = self._builder.get_object('inputsizelabel')
         self._answersizelabel = self._builder.get_object('answersizelabel')
 
@@ -119,6 +123,12 @@ class MainView(object):
         self._foldertreeviewnamecolumn = self._builder.get_object('foldernametreeviewcolumn')
         self._foldertreeviewnamecolumn.set_sort_column_id(0)
         self._foldertreeviewsizecolumn = self._builder.get_object('foldersizetreeviewcolumn')
+
+    def _load_choosenfiles_actions(self):
+        self._sortbynamebutton = self._builder.get_object('sortbynamebutton')
+        self._sortbyrandombutton = self._builder.get_object('sortbyrandombutton')
+        self._sortbynamebutton.connect('clicked', self._sortbyname_clicked)
+        self._sortbyrandombutton.connect('clicked', self._sortbyrandom_clicked)
 
     def _load_choosenfiles_treeview(self):
 
@@ -348,7 +358,9 @@ class MainView(object):
                 "folder" if is_folder else "document",
                 12, 0)
             # Append the item to the TreeStore
-            li = self._foldertreestore.append(parent, [f, img, "{} {}B".format(*self._raw_size_to_unit(size)), is_folder, fullname])
+            li = self._foldertreestore.append(parent,
+                                              [f, img, "{} {}B".format(*self._raw_size_to_unit(size)), is_folder,
+                                               fullname])
             # If the item is a folder, descend into it
             if is_folder:
                 for child in element.children:
@@ -397,7 +409,11 @@ class MainView(object):
         self._inputfiletextbuffer.set_text(input_content)
         self._answerfiletextbuffer.set_text(answer_content)
 
+        self._update_problem_files_number()
         self._update_problem_files_sizes(input_content, answer_content)
+
+    def _update_problem_files_number(self):
+        self._nfileslabel.set_text(str(len(self._choosenfilestreestore)))
 
     def _update_problem_files_sizes(self, input_content, answer_content):
 
@@ -410,7 +426,7 @@ class MainView(object):
 
         sizes = ['', 'K', 'M', 'G']
         measurement = floor(log(size, 1024))
-        return size//(1024**measurement), sizes[measurement]
+        return size // (1024 ** measurement), sizes[measurement]
 
     def _add_input_extension_clicked(self, element):
 
@@ -452,6 +468,18 @@ class MainView(object):
         if not is_folder:
             data.set_text(fullname, -1)
 
+    def _sortbyname_clicked(self, button):
+        try:
+            self.controller.sort_choosen_files()
+        except Exception as err:
+            self.open_error_dialog(err)
+
+    def _sortbyrandom_clicked(self, button):
+        try:
+            self.controller.shuffle_choosen_files()
+        except Exception as err:
+            self.open_error_dialog(err)
+
     def _choosenfiles_treeview_drag_data_received(self, widget, drag_context, x, y, data, info, time):
 
         try:
@@ -472,18 +500,21 @@ class MainView(object):
                 if self._choosenfilestreeviewselection.path_is_selected(path):
                     _, iterator = self._choosenfilestreeviewselection.get_selected()
                     inputfilename = self._choosenfilestreestore.get(iterator, 0)[0]
+                    inputfileindex = path.get_indices()[0]
+                    print('Input file index: ', inputfileindex)
                     self._right_click_menu = Gtk.Menu()
                     delete_button = Gtk.MenuItem("Eliminar")
-                    delete_button.connect('activate', partial(self._right_menu_delete_btn_clicked, inputfilename))
+                    delete_button.connect('activate',
+                                          partial(self._right_menu_delete_btn_clicked, inputfilename, inputfileindex))
                     self._right_click_menu.append(delete_button)
                     self._right_click_menu.show_all()
                     self._right_click_menu.popup(None, None, None, None, 0, Gtk.get_current_event_time())
 
-    def _right_menu_delete_btn_clicked(self, inputfilename, *args):
+    def _right_menu_delete_btn_clicked(self, inputfilename, inputfileindex, *args):
 
         try:
             self._right_click_menu.destroy()
-            self.controller.remove_choosen_file(inputfilename)
+            self.controller.remove_choosen_file(file_index=inputfileindex)
             self._enable_save_button()
         except Exception as err:
             self.open_error_dialog(err)
@@ -518,6 +549,7 @@ class ConfirmationDialog(Gtk.Dialog):
         box.add(label)
 
         self.show_all()
+
 
 class EntryDialog(Gtk.Dialog):
     def __init__(self, parent, label_text, title=None):

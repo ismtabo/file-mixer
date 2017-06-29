@@ -60,9 +60,7 @@ class MainViewController(object):
             self.view.update_choosen_files_tree_view(self.model.current_problem_choosenfiles)
             self.view.update_problem_content(*self.model.current_problem_files_content)
 
-
     def open_folder(self):
-
         new_path = self.view.open_folder_dialog(os.path.expanduser('~'))
 
         if new_path:
@@ -70,7 +68,6 @@ class MainViewController(object):
             self.view.update_folder_treeview(self.model.current_pathtree)
 
     def add_choosen_file(self, file_path):
-
         base_path, file_basename = os.path.split(file_path)
         file_name, extension = os.path.splitext(file_basename)
 
@@ -100,30 +97,41 @@ class MainViewController(object):
         self.view.update_choosen_files_tree_view(self.model.current_problem_choosenfiles)
         self.view.update_problem_content(*self.model.current_problem_files_content)
 
-    def remove_choosen_file(self, file_path):
+    def remove_choosen_file(self, file_path=None, file_index=None):
+        if file_path is None and file_index is None:
+            raise Exception('Either file name or file index has to be given')
 
-        file_name, _ = os.path.splitext(file_path)
-        self.model.remove_choosen_file(file_path)
+        # file_name, _ = os.path.splitext(file_path)
+        self.model.remove_choosen_file(file_index=file_index)
+
+        self.view.update_choosen_files_tree_view(self.model.current_problem_choosenfiles)
+        self.view.update_problem_content(*self.model.current_problem_files_content)
+
+    def sort_choosen_files(self):
+        self.model.sort_choosen_files()
+
+        self.view.update_choosen_files_tree_view(self.model.current_problem_choosenfiles)
+        self.view.update_problem_content(*self.model.current_problem_files_content)
+
+    def shuffle_choosen_files(self):
+        self.model.shuffle_choosen_files()
 
         self.view.update_choosen_files_tree_view(self.model.current_problem_choosenfiles)
         self.view.update_problem_content(*self.model.current_problem_files_content)
 
     def add_input_extension(self, new_input_extension):
-
-        if not new_input_extension in self.model.input_extensions:
+        if new_input_extension not in self.model.input_extensions:
             self.model.add_input_extensions(new_input_extension)
             self.view.update_extension_treeviews(self.model.input_extensions,
                                                  self.model.answer_extensions)
 
     def add_answer_extension(self, new_answer_extension):
-
-        if not new_answer_extension in self.model.answer_extensions:
+        if new_answer_extension not in self.model.answer_extensions:
             self.model.add_answer_extensions(new_answer_extension)
             self.view.update_extension_treeviews(self.model.input_extensions,
                                                  self.model.answer_extensions)
 
     def save_problem(self, force_ask_path=False):
-
         if force_ask_path:
             problem_path = self._ask_current_problem_path()
             self.model.current_problem_path = problem_path

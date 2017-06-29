@@ -11,5 +11,5 @@ class Serializable(ABC):
 
     @staticmethod
     @abstractmethod
-    def unserialize(self, marshall):
+    def unserialize(marshall):
         pass
