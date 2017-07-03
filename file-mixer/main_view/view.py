@@ -127,8 +127,10 @@ class MainView(object):
     def _load_choosenfiles_actions(self):
         self._sortbynamebutton = self._builder.get_object('sortbynamebutton')
         self._sortbyrandombutton = self._builder.get_object('sortbyrandombutton')
+        self._clearproblembutton = self._builder.get_object('clearproblembutton')
         self._sortbynamebutton.connect('clicked', self._sortbyname_clicked)
         self._sortbyrandombutton.connect('clicked', self._sortbyrandom_clicked)
+        self._clearproblembutton.connect('clicked', self._clearproblem_clicked)
 
     def _load_choosenfiles_treeview(self):
 
@@ -482,6 +484,12 @@ class MainView(object):
     def _sortbyrandom_clicked(self, button):
         try:
             self.controller.shuffle_choosen_files()
+        except Exception as err:
+            self.open_error_dialog(err)
+
+    def _clearproblem_clicked(self, button):
+        try:
+            self.controller.clear_choosen_files()
         except Exception as err:
             self.open_error_dialog(err)
 

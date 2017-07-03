@@ -119,6 +119,12 @@ class MainViewController(object):
         self.view.update_choosen_files_tree_view(self.model.current_problem_choosenfiles)
         self.view.update_problem_content(*self.model.current_problem_files_content)
 
+    def clear_choosen_files(self):
+        self.model.clear_choosen_files()
+
+        self.view.update_choosen_files_tree_view(self.model.current_problem_choosenfiles)
+        self.view.update_problem_content(*self.model.current_problem_files_content)
+
     def add_input_extension(self, new_input_extension):
         if new_input_extension not in self.model.input_extensions:
             self.model.add_input_extensions(new_input_extension)

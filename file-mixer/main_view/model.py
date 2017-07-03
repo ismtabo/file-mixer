@@ -135,6 +135,11 @@ class MainViewModel:
         self._problem.shuffle()
         self._problem.generate()
 
+    def clear_choosen_files(self):
+        if not self._problem:
+            raise NoneCurrentProblem("There is not current problem.\nPlease entry problem number.")
+        self._problem.clear()
+
     @property
     def current_problem_files_content(self):
 
