@@ -16,13 +16,17 @@ ProblemFile = namedtuple('ProblemFile', ['input', 'answer'])
 
 class Problem(Serializable):
     def __init__(self, problemid, used_files=None):
+        super(Serializable, self).__init__()
         self._problemid = problemid
         self._path = None
+        self._input = ""
+        self._answer = ""
         self._used_files = []
         self._used_files_mm = []
         self.used_files = used_files or []
-        self._input = ""
-        self._answer = ""
+
+    def __del__(self):
+        self.clear()
 
     @property
     def number(self):
@@ -67,10 +71,12 @@ class Problem(Serializable):
         self._used_files += [ProblemFile(input_file_name, answer_file_name)]
         with open(input_file_name, 'r+') as file:
             input_file_mm = mmap(file.fileno(), 0)
-            self._input += file.read()
+            input_content = file.read()
         with open(answer_file_name, 'r+') as file:
             answer_file_mm = mmap(file.fileno(), 0)
-            self._answer += file.read()
+            answer_content = file.read()
+        self._input = ''.join([self._input, input_content])
+        self._answer = ''.join([self._answer, answer_content])
         self._used_files_mm += [ProblemFile(input_file_mm, answer_file_mm)]
 
     def remove_used_files(self, file_iter):

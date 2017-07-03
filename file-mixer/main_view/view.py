@@ -425,7 +425,12 @@ class MainView(object):
     def _raw_size_to_unit(size):
 
         sizes = ['', 'K', 'M', 'G']
-        measurement = floor(log(size, 1024))
+        try:
+            size_log = log(size, 1024)
+        except ValueError as err:
+            print("Value error calculating log_1024 of {0}".format(size))
+            size_log = 0
+        measurement = floor(size_log)
         return size // (1024 ** measurement), sizes[measurement]
 
     def _add_input_extension_clicked(self, element):

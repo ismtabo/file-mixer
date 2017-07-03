@@ -73,6 +73,7 @@ class MainViewModel:
         if self._is_modified:
             raise UnsavedModifiedProblem('Current problem should be saved before open new one.')
 
+        del self._problem
         self._problem = problem
         self._is_modified = False
 
