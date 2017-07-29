@@ -9,7 +9,7 @@ from gi.repository import Gtk
 from gi.repository import Gdk
 
 from .controller import MainViewController
-from .errors import ChoosenFileHasNotInputExtension
+from .errors import ChoosenFileHasNotInputExtension, NoneCurrentProblem
 
 
 class MainView(object):
@@ -103,12 +103,14 @@ class MainView(object):
     def _load_problem_buttons(self):
 
         # File management buttons
+        self._casenumberedproblembutton = self._builder.get_object('numcasescheckbutton')
         self._newproblembutton = self._builder.get_object('newproblembutton')
         self._saveproblembutton = self._builder.get_object('saveproblembutton')
         self._openproblembutton = self._builder.get_object('openproblembutton')
         self._openfolderbutton = self._builder.get_object('openfolderbutton')
 
         # File management buttons events
+        self._casenumberedproblemtoogledhandler = self._casenumberedproblembutton.connect('toggled', self._case_numbered_problem_toogled)
         self._newproblembutton.connect('clicked', self._new_file_clicked)
         self._saveproblembutton.connect('clicked', self._save_problem_clicked)
         self._openproblembutton.connect('clicked', self._open_file_clicked)
@@ -231,6 +233,7 @@ class MainView(object):
         try:
             self.controller.new_problem_file()
             self._saveproblembutton.set_sensitive(False)
+            self._set_case_numbered_check_button_active(active=False)
         except Exception as err:
             self.open_error_dialog(err)
 
@@ -532,6 +535,16 @@ class MainView(object):
         except Exception as err:
             self.open_error_dialog(err)
 
+    def _case_numbered_problem_toogled(self, button, *args):
+
+        try:
+            case_numbered = button.get_active()
+            self.controller.toggle_case_numbered_problem(case_numbered=case_numbered)
+        except NoneCurrentProblem as err:
+            self._set_case_numbered_check_button_active(not button.get_active())
+        except Exception as err:
+            self.open_error_dialog(err)
+
     def _noop(self, *param, **kwargs):
 
         print('Event with params:\n{0}\n{1}'.format(param, kwargs))
@@ -543,6 +556,11 @@ class MainView(object):
     def _disable_save_button(self):
 
         self._saveproblembutton.set_sensitive(False)
+
+    def _set_case_numbered_check_button_active(self, active=False):
+
+        with self._casenumberedproblembutton.handler_block(self._casenumberedproblemtoogledhandler):
+            self._casenumberedproblembutton.set_active(active)
 
 
 class ConfirmationDialog(Gtk.Dialog):

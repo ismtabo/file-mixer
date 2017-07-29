@@ -1,8 +1,8 @@
 import os
 import stat
 
-from .models import Problem, FolderTreeElement
-from .errors import UnsavedModifiedProblem, NoneCurrentProblem
+from .errors import NoneCurrentProblem, UnsavedModifiedProblem
+from .models import FolderTreeElement, Problem, NumberedProblem
 
 
 class MainViewModel:
@@ -162,3 +162,12 @@ class MainViewModel:
 
     def set_problem_saved(self):
         self._is_modified = False
+
+    def toggle_case_numbered_problem(self, case_numbered=False):
+
+        if not case_numbered:
+            self._problem = self.current_problem.get_problem()
+        else:
+            self._problem = NumberedProblem.from_problem(self.current_problem)
+
+        self._problem.generate()

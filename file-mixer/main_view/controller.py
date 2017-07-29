@@ -160,6 +160,12 @@ class MainViewController(object):
         self._save_file(self.model.current_path, problem_answer_filename, problem_answer_content)
         self.model.set_problem_saved()
 
+    def toggle_case_numbered_problem(self, case_numbered=False):
+
+        self.model.toggle_case_numbered_problem(case_numbered=case_numbered)
+        self.view.update_choosen_files_tree_view(self.model.current_problem_choosenfiles)
+        self.view.update_problem_content(*self.model.current_problem_files_content)
+
     def _ask_current_problem_path(self):
 
         problem_path = self.view.open_folder_dialog(self.model.current_path, save=True)
