@@ -7,7 +7,7 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
-from main_view import MainView
+from .main_view import MainView
 
 BASE_DIR = os.path.dirname(__file__)
 

@@ -5,6 +5,8 @@ import traceback
 from functools import partial
 from math import log, floor
 
+import gi
+gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from gi.repository import Gdk
 
